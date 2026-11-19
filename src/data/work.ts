@@ -1,0 +1,329 @@
+export type WorkService =
+  | "Web Development"
+  | "UI/UX Design"
+  | "Graphic Design"
+  | "Branding"
+  | "Video & Motion";
+
+export type ProjectType =
+  | "Client Project"
+  | "Independent Project";
+
+export type WorkProject = {
+  id: string;
+  title: string;
+  category: string;
+  service: WorkService;
+  projectType: ProjectType; // New field
+  year: string;
+  role: string;
+  description: string;
+  technologies: string[];
+  image: string;
+  liveUrl: string;
+  githubUrl: string;
+  challenges: string;
+  solution: string;
+  features: string[];
+  featured: boolean;
+  published: boolean;
+  order: number;
+};
+export const workProjects: WorkProject[] = [
+  {
+    service: "Web Development",
+    id: "proj-1",
+    title: "FOSTIIMA Business School Website",
+    category: "Full-Stack Development / Institutional Website",
+    projectType:"Client Project",
+    year: "2026",
+    role: "Full-Stack Developer",
+    description:
+      "A modern, responsive institutional website for FOSTIIMA Business School featuring academic programs, admissions, placements, campus life, events, faculty, blogs, and dynamic content management.",
+    technologies: [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Tailwind CSS",
+      "Prisma",
+      "MySQL",
+      "Cloudinary",
+      "Node.js",
+    ],
+    image:
+      "https://res.cloudinary.com/njq5pi5g/image/upload/v1790754959/Screenshot_2026-09-30_at_1.24.47_PM.png",
+    liveUrl: "https://fostiima.org/",
+    githubUrl: "https://github.com/sumit9354800/fostiima",
+    challenges:
+      "Migrating and restructuring a large legacy institutional website into a modern Next.js architecture while preserving existing content, SEO-friendly URLs, responsive layouts, media assets, and legacy campaign links.",
+    solution:
+      "Built a component-driven Next.js architecture with reusable UI sections, Prisma and MySQL for dynamic content, Cloudinary-based media management, structured blog content blocks, responsive navigation, and scalable admin workflows for managing website content.",
+    features: [
+      "Responsive Institutional Website",
+      "Dynamic Academic Programs",
+      "Admissions & Application Sections",
+      "Placement & Recruiter Showcase",
+      "Faculty & Campus Information",
+      "Dynamic Blog & Content Management",
+      "Cloudinary Media Management",
+      "MySQL Database Integration",
+      "Admin Content Management",
+      "Legacy URL & SEO Migration",
+    ],
+    featured: true,
+    published: true,
+    order: 1,
+  },
+  {
+    service: "Web Development",
+    id: "proj-2",
+    title: "MRTECHYCOOL Business Website",
+    projectType:"Client Project",
+    category: "Client Project / Commercial",
+    year: "2026",
+    role: "Lead Full Stack Developer",
+    description:
+      "Production commercial platform engineered for MRTECHYCOOL delivering digital service booking, lead generation pipeline, and technical service catalogs with sub-second load times.",
+    technologies: [
+      "Next.js",
+      "React",
+      "Tailwind CSS",
+      "Node.js",
+      "MongoDB",
+      "Express.js",
+    ],
+    image:
+      "https://res.cloudinary.com/njq5pi5g/image/upload/v1788944433/techcool.png",
+    liveUrl: "https://www.mrtechycool.in/",
+    githubUrl: "https://github.com/sumit9354800/techcool",
+    challenges:
+      "Optimizing Core Web Vitals to sub-1.2s LCP on mobile devices while integrating real-time inquiry booking with automated dispatch pipelines.",
+    solution:
+      "Engineered server components with incremental static revalidation, lightweight SVG asset pipeline, and streamlined API routes with server-side validation.",
+    features: [
+      "Automated Lead Booking Engine",
+      "Dynamic Service Catalog",
+      "Admin Analytics Dashboard",
+      "SEO & Core Web Vitals 98+",
+    ],
+    featured: true,
+    published: true,
+    order: 2,
+  },
+
+  {
+    service: "Web Development",
+    id: "proj-3",
+    title: "Growje Business Website",
+    projectType:"Client Project",
+    category: "Client Project / Commercial",
+    year: "2024",
+    role: "Full Stack Web Developer",
+    description:
+      "High-conversion corporate business portal for Growje facilitating enterprise business solutions, client onboarding, and digital marketing consulting services.",
+    technologies: [
+      "React",
+      "TypeScript",
+      "Tailwind CSS",
+      "Node.js",
+      "MongoDB",
+      "REST APIs",
+    ],
+    image:
+      "https://res.cloudinary.com/njq5pi5g/image/upload/v1788944324/growje.png",
+    liveUrl: "https://growje.com/",
+    githubUrl: "https://github.com/sumit9354800/growje",
+    challenges:
+      "Building a responsive, high-performance portal with zero layout shifts and custom interactive inquiry funnels.",
+    solution:
+      "Developed modular atomic components, validated contact pathways with Zod, and configured aggressive asset caching headers.",
+    features: [
+      "Custom Client Onboarding Funnel",
+      "Responsive Architecture across 360px-1920px",
+      "Secure Consultation Gateway",
+      "Modern Dark-Mode Technical Aesthetic",
+    ],
+    featured: true,
+    published: true,
+    order: 3,
+  },
+  {
+    service: "Web Development",
+    id: "proj-4",
+    title: "MX SAMMY | B2B Sales & Revenue Analytics CRM",
+    projectType:"Independent Project",
+    category: "Full Stack / SaaS CRM",
+    year: "2024",
+    role: "Full Stack Developer",
+    description:
+      "High-performance enterprise B2B sales and revenue analytics CRM featuring real-time revenue tracking, conversion pipelines, customer lifetime metrics, and interactive multi-tier visual dashboards.",
+    technologies: [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Tailwind CSS",
+      "Recharts",
+      "Node.js",
+      "MongoDB",
+    ],
+    image:
+      "https://res.cloudinary.com/njq5pi5g/image/upload/v1789039538/dashbord.png",
+    liveUrl: "https://dashboard-chi-inky-30.vercel.app/",
+    githubUrl: "https://github.com/sumit9354800/dashboard",
+    challenges:
+      "Aggregating multi-source enterprise revenue streams into sub-second interactive analytics without client-side latency or frame drops.",
+    solution:
+      "Engineered memoized aggregation pipelines, modular dashboard cards, and optimized client state management.",
+    features: [
+      "Real-time Revenue Telemetry",
+      "Lead Conversion Pipelines",
+      "Interactive Financial Charts",
+      "Customer Lifetime Analytics",
+    ],
+    featured: true,
+    published: true,
+    order: 4,
+  },
+
+  {
+    service: "Web Development",
+    id: "proj-5",
+    title: "STACKED — Immersive 3D Experience",
+    projectType:"Independent Project",
+    category: "Creative Engineering / 3D Web",
+    year: "2024",
+    role: "Creative Frontend Engineer",
+    description:
+      "High-fidelity 3D spatial interactive web experiment exploring dynamic 3D burger model choreography, lighting, and real-time pointer physics.",
+    technologies: ["Three.js", "React", "GSAP", "Tailwind CSS", "TypeScript"],
+    image:
+      "https://res.cloudinary.com/njq5pi5g/image/upload/v1788944464/burger-web.png",
+    liveUrl: "https://3-d-model-website-phi.vercel.app/",
+    githubUrl: "https://github.com/sumit9354800/3D-model-website",
+    challenges:
+      "Maintaining a solid 60 FPS on low-power mobile devices while computing dynamic matrix transformations and lighting passes.",
+    solution:
+      "Used instanced buffer geometries, memory pooling, and throttled pointer listeners with WebGL state memoization.",
+    features: [
+      "Custom GLSL Shader Illumination",
+      "Spatial Camera Controls",
+      "Procedural Geometry Stacking",
+      "Touch & Pointer Physics",
+    ],
+    featured: true,
+    published: true,
+    order: 5,
+  },
+
+  {
+    service: "Web Development",
+    id: "proj-6",
+    title: "KiranaGo — Grocery E-commerce",
+    projectType:"Independent Project",
+    category: "Web Application / Hyperlocal Delivery",
+    year: "2023",
+    role: "Full Stack Developer",
+    description:
+      "Hyperlocal grocery discovery and ordering platform facilitating neighborhood store connections, item catalog navigation, and rapid one-tap cart checkout.",
+    technologies: ["React", "Node.js", "Express.js", "MongoDB", "Tailwind CSS"],
+    image:
+      "https://res.cloudinary.com/njq5pi5g/image/upload/v1788944354/kirana.png",
+    liveUrl: "https://kirana-go-tau.vercel.app/",
+    githubUrl: "https://github.com/sumit9354800/kirana-go",
+    challenges:
+      "Designing an ultra-intuitive order workflow for users with varying digital literacy.",
+    solution:
+      "Created clean, high-contrast visual item tags and streamlined one-tap checkout counters.",
+    features: [
+      "Localized Store Search",
+      "Quick-Add Grocery Catalog",
+      "Dynamic Order Estimator",
+      "Mobile-First Responsive Layout",
+    ],
+    featured: false,
+    published: true,
+    order: 6,
+  },
+
+  {
+    service: "Web Development",
+    id: "proj-7",
+    title: "FreshCart Organics Web Application",
+    projectType:"Independent Project",
+    category: "E-Commerce Application",
+    year: "2023",
+    role: "Frontend & Backend Engineer",
+    description:
+      "Farm-to-table organic produce platform with categorical filters, seasonal product badges, weight-based pricing, and price breakdown computations.",
+    technologies: [
+      "React",
+      "JavaScript",
+      "Node.js",
+      "Express.js",
+      "MongoDB",
+      "Tailwind CSS",
+    ],
+    image:
+      "https://res.cloudinary.com/njq5pi5g/image/upload/v1788944300/freshcart.png",
+    liveUrl: "https://cloth-ecommerce-frontend.vercel.app/",
+    githubUrl: "https://github.com/sumit9354800/freshcart",
+    challenges:
+      "Handling complex price per weight calculations and dynamic promo discounts.",
+    solution:
+      "Built deterministic calculation utility routines with unit-test verified precision.",
+    features: [
+      "Weight-Based Pricing Engine",
+      "Seasonal Filter Tags",
+      "Customer Review Threads",
+      "Receipt Generator",
+    ],
+    featured: false,
+    published: true,
+    order: 7,
+  },
+
+  {
+    service: "Web Development",
+    id: "proj-8",
+    title: "India Travel Safari — Premium Goa Holiday Landing Page",
+    projectType:"Client Project",
+    category: "Frontend Engineering / Travel & Tourism",
+    year: "2026",
+    role: "Frontend Engineer",
+    description:
+      "Premium conversion-focused Goa holiday landing page built for India Travel Safari, featuring a cinematic Goa hero section, 5 nights / 6 days itinerary, premium and standard package comparison, travel inclusions, upgrades, FAQs, WhatsApp and call CTAs, and a responsive mobile-first experience.",
+    technologies: [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Tailwind CSS",
+      "Lucide React",
+      "Responsive Design",
+    ],
+    image:
+      "https://res.cloudinary.com/njq5pi5g/image/upload/v1791392566/Screenshot_2026-10-07_at_10.30.43_PM.png",
+    liveUrl: "https://travel.indiatravelsafari.com/",
+    githubUrl: "https://github.com/sumit9354800/goa-holiday",
+    challenges:
+      "Creating a premium travel experience that balances strong visual storytelling, detailed itinerary information, package pricing, and lead-generation CTAs without making the landing page feel overcrowded.",
+    solution:
+      "Built a structured responsive layout with a cinematic Goa hero, dedicated itinerary cards, premium package highlighting, visual content sections, reusable CTA components, responsive navigation, and direct WhatsApp and phone conversion paths.",
+    features: [
+      "Cinematic Goa Hero Section",
+      "5 Nights / 6 Days Interactive Travel Presentation",
+      "Premium & Standard Package Comparison",
+      "Day-wise Goa Itinerary Cards",
+      "North Goa & South Goa Experiences",
+      "Dudhsagar Waterfall Experience",
+      "Water Sports & Sunset Cruise Section",
+      "WhatsApp Lead Generation CTA",
+      "Direct Call CTA",
+      "Responsive Mobile Navigation",
+      "FAQ Section",
+      "Google Tag Manager Integration",
+    ],
+    featured: true,
+    published: true,
+    order: 8,
+  },
+];
