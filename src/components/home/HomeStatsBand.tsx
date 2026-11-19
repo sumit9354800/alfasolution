@@ -1,7 +1,7 @@
 
 const stats = [
   {
-    number: "07+",
+    number: "03+",
     label: "Years of Experience",
     description: "Building digital experiences",
   },
@@ -11,7 +11,7 @@ const stats = [
     description: "Across different industries",
   },
   {
-    number: "20+",
+    number: "30+",
     label: "Happy Clients",
     description: "Built on trust and collaboration",
   },
