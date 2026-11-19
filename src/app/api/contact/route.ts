@@ -2,9 +2,13 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { contactSchema } from "@/lib/validations/contact";
+import { verifyCaptchaToken } from "@/lib/captcha";
 
-// Basic in-memory rate limiter
-const requests = new Map<string, { count: number; resetAt: number }>();
+// Rate limiter: 5 requests per 10 minutes per IP.
+const requests = new Map<
+  string,
+  { count: number; resetAt: number }
+>();
 
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_REQUESTS = 5;
@@ -31,7 +35,6 @@ function isRateLimited(ip: string) {
   return false;
 }
 
-// Escape dynamic values before inserting them into HTML
 function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (character) => {
     const entities: Record<string, string> = {
@@ -47,10 +50,8 @@ function escapeHtml(value: string) {
 }
 
 export async function POST(request: Request) {
-  console.log("ALFA CONTACT API HIT");
-
   try {
-    // 1. Check content type
+    // Content type validation
     const contentType = request.headers.get("content-type") || "";
 
     if (!contentType.includes("application/json")) {
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Check declared request size
+    // Request size validation
     const contentLength = Number(
       request.headers.get("content-length") || 0
     );
@@ -72,17 +73,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Read and check actual request size
     const rawBody = await request.text();
 
-    if (new TextEncoder().encode(rawBody).length > MAX_BODY_SIZE) {
+    if (Buffer.byteLength(rawBody, "utf8") > MAX_BODY_SIZE) {
       return NextResponse.json(
         { success: false, message: "Request is too large." },
         { status: 413 }
       );
     }
 
-    // 4. Parse JSON safely
     let body: unknown;
 
     try {
@@ -94,28 +93,24 @@ export async function POST(request: Request) {
       );
     }
 
-    if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json(
-        { success: false, message: "Invalid form submission." },
+        { success: false, message: "Invalid request data." },
         { status: 400 }
       );
     }
 
-    // 5. Honeypot protection
-    const formBody = body as Record<string, unknown>;
+    const submitted = body as Record<string, unknown>;
 
+    // Honeypot: return fake success to automated spam submissions.
     if (
-      typeof formBody.website === "string" &&
-      formBody.website.trim() !== ""
+      typeof submitted.website === "string" &&
+      submitted.website.trim() !== ""
     ) {
-      // Return a generic success response to bots
-      return NextResponse.json({
-        success: true,
-        message: "Your enquiry has been submitted successfully.",
-      });
+      return NextResponse.json({ success: true });
     }
 
-    // 6. Basic IP rate limiting
+    // IP rate limiting
     const forwardedFor = request.headers.get("x-forwarded-for");
     const realIp = request.headers.get("x-real-ip");
 
@@ -134,163 +129,129 @@ export async function POST(request: Request) {
       );
     }
 
-    // 7. Validate form data
+    // Zod validation
     const validation = contactSchema.safeParse(body);
 
     if (!validation.success) {
+      const firstError = validation.error.issues[0];
+
       return NextResponse.json(
         {
           success: false,
-          message: "Please check your details and try again.",
+          message: firstError?.message || "Invalid form information.",
           errors: validation.error.flatten().fieldErrors,
         },
         { status: 400 }
       );
     }
 
-    const { name, email, phone, service, message } = validation.data;
+    const {
+      name,
+      email,
+      phone,
+      service,
+      message,
+      captchaToken,
+      captchaAnswer,
+    } = validation.data;
 
-    // 8. Check environment variables
+    // Server-side CAPTCHA verification
+    const captchaValid = verifyCaptchaToken(
+      captchaToken,
+      captchaAnswer
+    );
+
+    if (!captchaValid) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Verification code is incorrect or expired. Please try again.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Resend environment validation
     const apiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.CONTACT_FROM_EMAIL;
     const toEmail = process.env.CONTACT_TO_EMAIL;
 
     if (!apiKey || !fromEmail || !toEmail) {
-      console.error("CONTACT EMAIL CONFIGURATION ERROR:", {
-        hasApiKey: Boolean(apiKey),
-        hasFromEmail: Boolean(fromEmail),
-        hasToEmail: Boolean(toEmail),
-      });
+      console.error("Missing Resend environment variables.");
 
       return NextResponse.json(
         {
           success: false,
-          message: "Email configuration is incomplete.",
+          message: "Email service is not configured.",
         },
         { status: 500 }
       );
     }
 
-    // 9. Escape values for HTML email
+    const resend = new Resend(apiKey);
+
     const safeName = escapeHtml(name);
     const safeEmail = escapeHtml(email);
     const safePhone = escapeHtml(phone || "Not provided");
     const safeService = escapeHtml(service);
-    const safeMessage = escapeHtml(message).replace(/\r?\n/g, "<br />");
+    const safeMessage = escapeHtml(message).replace(/\n/g, "<br/>");
 
-    // 10. Create Resend instance
-    const resend = new Resend(apiKey);
-
-    // 11. Send email
     const { data, error } = await resend.emails.send({
       from: fromEmail,
-      to: [toEmail],
+      to: toEmail,
       replyTo: email,
       subject: `New Project Enquiry — ${name}`,
       text: `
-NEW PROJECT ENQUIRY
-==============================
+New Project Enquiry
 
 Name: ${name}
 Email: ${email}
 Phone: ${phone || "Not provided"}
-Interested In: ${service}
+Service: ${service}
 
-PROJECT DETAILS:
+Project Details:
 ${message}
-
-==============================
-Sent from Alfa Solution Contact Form
       `,
       html: `
-        <div style="margin:0;padding:40px 15px;background:#f4f1ea;font-family:Arial,Helvetica,sans-serif;color:#191d27;">
-          <div style="max-width:620px;margin:0 auto;background:#ffffff;border:1px solid #e8e2d8;">
+        <div style="font-family:Arial,sans-serif;max-width:650px;margin:auto;color:#191D27;">
+          <div style="background:#191D27;padding:25px;color:#ffffff;">
+            <h2 style="margin:0;">New Project Enquiry</h2>
+            <p style="margin:8px 0 0;color:#B58A62;">Alfa Solution</p>
+          </div>
 
-            <div style="padding:28px 32px;background:#191d27;">
-              <p style="margin:0;color:#b58a62;font-size:12px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;">
-                Alfa Solution
-              </p>
-              <h1 style="margin:14px 0 0;color:#ffffff;font-size:26px;line-height:1.3;">
-                New Project Enquiry
-              </h1>
-              <p style="margin:8px 0 0;color:#c8c8c8;font-size:14px;">
-                A new enquiry has been submitted through your website.
-              </p>
-            </div>
+          <div style="padding:25px;border:1px solid #eeeeee;">
+            <p><strong>Name:</strong> ${safeName}</p>
+            <p><strong>Email:</strong> ${safeEmail}</p>
+            <p><strong>Phone:</strong> ${safePhone}</p>
+            <p><strong>Interested In:</strong> ${safeService}</p>
 
-            <div style="padding:30px 32px;">
-              <p style="margin:0 0 22px;color:#8d6749;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;">
-                Contact Information
-              </p>
+            <hr style="border:none;border-top:1px solid #eeeeee;margin:25px 0;" />
 
-              <table style="width:100%;border-collapse:collapse;font-size:14px;">
-                <tr>
-                  <td style="padding:13px 0;color:#777;border-bottom:1px solid #eee;width:130px;">Name</td>
-                  <td style="padding:13px 0;color:#191d27;font-weight:bold;border-bottom:1px solid #eee;">${safeName}</td>
-                </tr>
-                <tr>
-                  <td style="padding:13px 0;color:#777;border-bottom:1px solid #eee;">Email</td>
-                  <td style="padding:13px 0;border-bottom:1px solid #eee;">
-                    <a href="mailto:${safeEmail}" style="color:#8d6749;text-decoration:none;">${safeEmail}</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:13px 0;color:#777;border-bottom:1px solid #eee;">Phone</td>
-                  <td style="padding:13px 0;color:#191d27;border-bottom:1px solid #eee;">${safePhone}</td>
-                </tr>
-                <tr>
-                  <td style="padding:13px 0;color:#777;border-bottom:1px solid #eee;">Service</td>
-                  <td style="padding:13px 0;color:#191d27;font-weight:bold;border-bottom:1px solid #eee;">${safeService}</td>
-                </tr>
-              </table>
-
-              <div style="margin-top:30px;">
-                <p style="margin:0 0 12px;color:#8d6749;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;">
-                  Project Details
-                </p>
-                <div style="padding:20px;background:#f8f6f2;border-left:3px solid #b58a62;color:#333;font-size:14px;line-height:1.8;overflow-wrap:anywhere;">
-                  ${safeMessage}
-                </div>
-              </div>
-
-              <div style="margin-top:30px;">
-                <a href="mailto:${safeEmail}" style="display:inline-block;padding:13px 22px;background:#191d27;color:#ffffff;text-decoration:none;font-size:13px;font-weight:bold;">
-                  Reply to Enquiry
-                </a>
-              </div>
-            </div>
-
-            <div style="padding:20px 32px;background:#f8f6f2;border-top:1px solid #eee;">
-              <p style="margin:0;color:#777;font-size:12px;line-height:1.7;">
-                This enquiry was submitted through the Alfa Solution website contact form.
-              </p>
-            </div>
-
+            <h3>Project Details</h3>
+            <p style="line-height:1.7;">${safeMessage}</p>
           </div>
         </div>
       `,
     });
 
-    // 12. Handle Resend errors
     if (error || !data?.id) {
       console.error("RESEND EMAIL ERROR:", error);
 
       return NextResponse.json(
         {
           success: false,
-          message: "Email could not be sent. Please try again.",
+          message: "Unable to send your enquiry. Please try again.",
         },
         { status: 502 }
       );
     }
 
-    // 13. Log successful Resend acceptance
-    console.log("RESEND EMAIL ACCEPTED:", data.id);
+    console.info("RESEND EMAIL ACCEPTED:", data.id);
 
     return NextResponse.json({
       success: true,
-      message: "Your enquiry has been submitted successfully.",
-      emailId: data.id,
+      message: "Your enquiry has been sent successfully.",
     });
   } catch (error) {
     console.error("CONTACT API ERROR:", error);
@@ -298,7 +259,7 @@ Sent from Alfa Solution Contact Form
     return NextResponse.json(
       {
         success: false,
-        message: "Something went wrong. Please try again later.",
+        message: "Something went wrong. Please try again.",
       },
       { status: 500 }
     );
