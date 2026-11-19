@@ -23,11 +23,9 @@ export const contactSchema = z
     phone: z
       .string()
       .trim()
-      .max(20, "Phone number is too long")
       .refine(
-        (value) =>
-          value === "" || /^[+()\d\s.-]{7,20}$/.test(value),
-        "Please enter a valid phone number"
+        (value) => value === "" || /^[6-9]\d{9}$/.test(value),
+        "Please enter a valid 10-digit Indian mobile number"
       ),
 
     service: z.enum([
@@ -36,14 +34,20 @@ export const contactSchema = z
       "Both",
       "Other",
     ]),
-    
+
     message: z
       .string()
       .trim()
       .min(20, "Please describe your project in at least 20 characters")
       .max(3000, "Message cannot exceed 3000 characters"),
 
-    // Honeypot: real users should always leave this empty.
+    // Cloudflare Turnstile CAPTCHA token
+    captchaToken: z
+      .string()
+      .min(1, "Please complete the CAPTCHA verification")
+      .max(2048, "Invalid CAPTCHA token"),
+
+    // Honeypot protection
     website: z.string().max(0, "Invalid submission"),
   })
   .strict();

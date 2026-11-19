@@ -20,7 +20,7 @@ const contactOptions = [
   },
   {
     label: "Email Us",
-    href: "mailto:nishant@aplhasolution.net",
+    href: "mailto:nishant@alfasolution.net",
     icon: FaEnvelope,
     color: "bg-[#788A9A] hover:bg-[#627687]",
   },

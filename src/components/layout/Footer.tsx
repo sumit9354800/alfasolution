@@ -124,10 +124,10 @@ export default function Footer() {
               <div>
                 <p className="mb-2 text-xs text-white/35">Email</p>
                 <a
-                  href="mailto:nishant@aplhasolution.net"
+                  href="mailto:nishant@alfasolution.net"
                   className="break-all text-sm text-white/65 transition-colors hover:text-[#B58A62]"
                 >
-                  nishant@aplhasolution.net
+                  nishant@alfasolution.net
                 </a>
               </div>
               <div>
