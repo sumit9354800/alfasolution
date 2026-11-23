@@ -2,7 +2,7 @@
 import type { MetadataRoute } from "next";
 
 const baseUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.yourdomain.com";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.alfasolution.net/";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const pages = [

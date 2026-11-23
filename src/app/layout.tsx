@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    "Alfa Solution provides professional website development, web application development and mobile app development services to help businesses grow digitally.",
+    "Alfa Solution provides professional website development, web application development, SEO services, B2B portal development and mobile app development services to help businesses grow digitally.",
 
   keywords: [
     "Alfa Solution",
@@ -46,6 +46,23 @@ export const metadata: Metadata = {
     "ecommerce website development",
     "responsive website development",
     "custom web applications",
+
+    // Website Design Keywords
+    "Best Website Design Company in India",
+    "Best Website Design Company in Mumbai",
+
+    // SEO Service Keywords
+    "Best SEO Service in New Delhi",
+    "Best SEO Service in Jaipur",
+    "Best SEO Service in Tamil Nadu",
+
+    // B2B Portal Keywords
+    "Best B2B Portal in India",
+    "Best B2B Portal in Maharashtra",
+    "Best B2B Service in Rajkot",
+
+    // App Development Keywords
+    "Best Android App Development in Gurugram",
   ],
 
   applicationName: "Alfa Solution",
@@ -68,7 +85,7 @@ export const metadata: Metadata = {
     siteName: "Alfa Solution",
     title: "Alfa Solution | Website & App Development Company",
     description:
-      "We build modern websites, web applications and mobile apps for businesses looking to grow their digital presence.",
+      "We build modern websites, web applications, SEO solutions, B2B portals and mobile apps for businesses looking to grow their digital presence.",
     images: [
       {
         url: "/images/og-image.jpg",
@@ -83,7 +100,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Alfa Solution | Website & App Development",
     description:
-      "Professional website development and mobile application development solutions for modern businesses.",
+      "Professional website development, SEO services, B2B portal development and mobile application development solutions.",
     images: ["/images/og-image.jpg"],
   },
 
