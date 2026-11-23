@@ -1,5 +1,5 @@
-
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { DM_Sans, Manrope } from "next/font/google";
 import "./globals.css";
 
@@ -136,9 +136,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-IN">
-      <body
-        className={`${dmSans.variable} ${manrope.variable} antialiased`}
-      >
+      <body className={`${dmSans.variable} ${manrope.variable} antialiased`}>
+        <Script
+          id="google-tag-manager"
+          src="https://www.googletagmanager.com/gtm.js?id=GTM-NCBHJ4NJ"
+          strategy="afterInteractive"
+        />
+
+        <Script id="google-tag-manager-init" strategy="afterInteractive">
+          {`
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+    `}
+        </Script>
+
         <Navbar />
         <main>{children}</main>
         <Footer />

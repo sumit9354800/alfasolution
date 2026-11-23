@@ -1,0 +1,26 @@
+You are a senior front-end engineer and UI designer. Improve and enhance the React/Next.js section code provided above. Return a complete, drop-in replacement file.
+
+PROJECT CONTEXT
+- Stack: Next.js (App Router), TypeScript (.tsx), Tailwind CSS. Use next/image and next/link where relevant.
+- Brand: "Alfa Solution", a digital studio (website and mobile app development).
+- Design style: dark, cinematic, premium, minimal, sharp corners (no heavy rounding on buttons or cards).
+- Colors: bg dark #191D27, bronze #B58A62, light bronze #D2AD8D, cream #F4F1EA, white with opacity for borders and muted text.
+- Fonts: headings use the `font-heading` class, body uses the default font.
+- Keep the existing copy, links (/contact, /services, #services) and structure unless a change clearly improves the section. Do not invent fake stats, clients, testimonials or numbers.
+
+WHAT TO IMPROVE (apply to every section)
+1. Visual polish: better depth (soft gradients, vignette, subtle glows, borders, shadows), consistent spacing and a strong visual hierarchy.
+2. Animations: staggered fade-up entrance, subtle floating or rotating decorative elements, hover and focus micro-interactions. Use only CSS keyframes defined inside the component with a <style dangerouslySetInnerHTML> tag. Do NOT require tailwind.config changes or new npm packages. Always respect prefers-reduced-motion.
+3. Performance: use next/image (priority only for above-the-fold images, correct `sizes`), avoid heavy JS, no unnecessary "use client". Add "use client" only if hooks or events are needed.
+4. Readability: no text smaller than 10px, comfortable line-height, good contrast, buttons at least 48px tall.
+5. Accessibility: semantic HTML, aria-labelledby or aria-label on sections, aria-hidden on decorative elements, empty alt on decorative images, visible focus-visible rings, screen-reader-friendly alternatives for animated content.
+6. Responsiveness: must look great on mobile, tablet, desktop and ultra-wide screens. Don't hide important content on mobile.
+7. Code quality: clean, well-organized, data-driven (map over arrays instead of repeating markup), short comments for each block.
+
+OUTPUT FORMAT
+- Give the full updated component in a single tsx code block, ready to replace the old file. No partial snippets.
+- After the code, add a short Hinglish summary (Hindi in Roman script) of what changed, grouped as: Animations, Performance, Visual, Accessibility, New content.
+- If you add any new content (chips, labels, etc.), mention it so I can edit it.
+- If something needs a setup step (a new image, a config change), tell me clearly. Otherwise say "no extra setup needed".
+
+Here is my code:
