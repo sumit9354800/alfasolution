@@ -19,8 +19,7 @@ const manrope = Manrope({
   display: "swap",
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.yourdomain.com";
+const siteUrl = "https://www.alfasolution.net";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -51,16 +50,12 @@ export const metadata: Metadata = {
 
   applicationName: "Alfa Solution",
 
-  authors: [
-    {
-      name: "Alfa Solution",
-    },
-  ],
-
+  authors: [{ name: "Alfa Solution" }],
   creator: "Alfa Solution",
   publisher: "Alfa Solution",
 
   alternates: {
+    canonical: "/",
     languages: {
       "en-IN": "/",
     },
