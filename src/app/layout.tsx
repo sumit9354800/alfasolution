@@ -19,7 +19,7 @@ const sans = localFont({
 
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.alfasolution.net").replace(/\/+$/, "");
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
-// Google Search Console → Settings → Ownership verification → "HTML tag" wala content code
+// Google Search Console → Settings → Ownership verification → "HTML tag" content code
 const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
 
 const defaultTitle = "Website & App Development Company in India | Alfa Solution";
@@ -28,9 +28,10 @@ const defaultDescription =
 
 // Fallback metadata. Every public page sets its own title, description and
 // canonical URL from Admin → SEO, which takes priority over these values.
+// No title template: pages already add "| Alfa Solution" themselves.
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: defaultTitle, template: "%s | Alfa Solution" },
+  title: { default: defaultTitle },
   description: defaultDescription,
   applicationName: "Alfa Solution",
   authors: [{ name: "Alfa Solution", url: siteUrl }],
