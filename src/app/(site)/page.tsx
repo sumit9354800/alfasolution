@@ -14,7 +14,8 @@ import { listLatestPosts } from "@/server/repos/blog";
 // import { LiveBrowser, type PreviewSite } from "@/components/site/LiveBrowser";
 import { ProjectCard } from "@/components/site/ProjectCard";
 import { CtaBand, FaqList, SectionHeader } from "@/components/site/blocks";
-import {  formatDate } from "@/lib/format";
+import { formatDate } from "@/lib/format";
+import { Testimonials } from "@/components/site/Testimonials";
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata({ path: "/" });
@@ -218,33 +219,7 @@ export default async function HomePage() {
       ) : null}
 
       {/* Testimonials — only real, published reviews */}
-      {testimonials.length ? (
-        <section className="bg-white">
-          <div className="container-site py-20 sm:py-24">
-            <h2 className="display-md">What clients say</h2>
-            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {testimonials.slice(0, 6).map((item) => (
-                <figure
-                  key={item.id}
-                  className="flex flex-col justify-between rounded-[var(--radius-card)] border border-line bg-paper p-7"
-                >
-                  <blockquote className="text-[1.05rem] leading-relaxed text-ink">
-                    “{item.quote}”
-                  </blockquote>
-                  <figcaption className="mt-6 text-sm">
-                    <span className="font-semibold">{item.author_name}</span>
-                    <span className="block text-slate">
-                      {[item.author_role, item.company]
-                        .filter(Boolean)
-                        .join(", ")}
-                    </span>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
+      <Testimonials items={testimonials} />
 
       {/* Insights */}
       {posts.length ? (

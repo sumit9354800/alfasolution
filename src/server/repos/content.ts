@@ -145,6 +145,8 @@ export const listTeam = cache(async (opts: { includeDrafts?: boolean } = {}) =>
 );
 
 export type Testimonial = {
+    source: "direct" | "google";
+  source_url: string | null;
   id: number;
   author_name: string;
   author_role: string | null;
@@ -154,6 +156,7 @@ export type Testimonial = {
   avatar: string | null;
   sort_order: number;
   is_published: number;
+  
 };
 
 export const listTestimonials = cache(async (opts: { includeDrafts?: boolean } = {}) =>
