@@ -1,5 +1,4 @@
 npm run admin:create -- --email admin@alfasolution.net --name "Alfa Admin" --password "Alfa@Admin2026#"
 
 admin@alfasolution.net
-
 Alfa@Admin2026#
