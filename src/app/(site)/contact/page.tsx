@@ -1,12 +1,19 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { buildMetadata } from "@/server/seo";
+import { env } from "@/server/env";
 import { getSetting } from "@/server/settings";
 import { getPackageBySlug, listServices } from "@/server/repos/content";
 import { PageIntro } from "@/components/site/blocks";
+import { JsonLd } from "@/components/site/JsonLd";
 import { ContactForm } from "@/components/site/ContactForm";
 
+const SEO_DESCRIPTION =
+  "Contact Alfa Solution for website, ecommerce, web app and mobile app development anywhere in India. We reply within one working day with next steps and an estimate.";
+
 export async function generateMetadata(): Promise<Metadata> {
-  return buildMetadata({ path: "/contact", title: "Contact" });
+  // An entry for /contact in Admin → SEO → Page titles & descriptions takes priority over these.
+  return buildMetadata({ path: "/contact", title: "Contact Our Website Developers in India", description: SEO_DESCRIPTION });
 }
 
 export default async function ContactPage({ searchParams }: { searchParams: Promise<{ package?: string }> }) {
@@ -19,13 +26,14 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
   const options = services.map((service) => service.title);
   if (pkg) options.unshift(`${pkg.name} package`);
   const whatsapp = general.whatsapp.replace(/\D/g, "");
+  const phone = general.phone.replace(/\s+/g, "");
 
   return (
     <>
       <PageIntro
         crumbs={[{ label: "Contact" }]}
-        title="Tell us what you’re building."
-        lede="A few lines is enough to start. We reply within one working day with questions, a rough estimate and the next step."
+        title="Talk to our website & app development team"
+        lede="Tell us what you’re building — a few lines is enough. We work with businesses across India and reply within one working day with questions, a rough estimate and the next step."
       />
       <section className="bg-white">
         <div className="container-site grid gap-14 py-16 sm:py-20 lg:grid-cols-[1.35fr_0.65fr]">
@@ -40,7 +48,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
             {general.phone ? (
               <div>
                 <h2 className="text-sm font-semibold text-slate">Phone</h2>
-                <a href={`tel:${general.phone.replace(/\s+/g, "")}`} className="mt-1 block text-lg font-semibold hover:text-accent">
+                <a href={`tel:${phone}`} className="mt-1 block text-lg font-semibold hover:text-accent">
                   {general.phone}
                 </a>
               </div>
@@ -51,6 +59,13 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
                 <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noopener noreferrer" className="mt-1 block text-lg font-semibold hover:text-accent">
                   Message us
                 </a>
+              </div>
+            ) : null}
+            {general.address ? (
+              <div>
+                <h2 className="text-sm font-semibold text-slate">Address</h2>
+                <address className="mt-1 whitespace-pre-line not-italic">{general.address}</address>
+                <p className="mt-1 text-sm text-slate">Serving clients across India, online and on-site.</p>
               </div>
             ) : null}
             {general.hours ? (
@@ -67,9 +82,42 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
                 <li>3. A written proposal with a fixed price and schedule.</li>
               </ol>
             </div>
+            <p className="text-sm text-slate">
+              Want to see prices first? <Link href="/pricing" className="link">View our packages</Link>. Have a quick question?{" "}
+              <Link href="/faq" className="link">Read the FAQ</Link>.
+            </p>
           </aside>
         </div>
       </section>
+
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          name: "Contact Alfa Solution",
+          url: `${env.siteUrl}/contact`,
+          description: SEO_DESCRIPTION,
+          inLanguage: "en-IN",
+          mainEntity: {
+            "@type": "ProfessionalService",
+            name: general.companyName,
+            url: env.siteUrl,
+            image: `${env.siteUrl}/images/logo-black.png`,
+            email: general.email || undefined,
+            telephone: general.phone || undefined,
+            areaServed: { "@type": "Country", name: "India" },
+            address: { "@type": "PostalAddress", streetAddress: general.address || undefined, addressCountry: "IN" },
+            contactPoint: {
+              "@type": "ContactPoint",
+              contactType: "customer service",
+              telephone: general.phone || undefined,
+              email: general.email || undefined,
+              areaServed: "IN",
+              availableLanguage: ["English", "Hindi"],
+            },
+          },
+        }}
+      />
     </>
   );
 }

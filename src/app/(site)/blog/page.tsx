@@ -3,25 +3,48 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Search } from "lucide-react";
 import { buildMetadata } from "@/server/seo";
+import { env } from "@/server/env";
 import { listCategories, listPublicPosts, listTags, type BlogPost } from "@/server/repos/blog";
 import { EmptyState, PageIntro, Pagination } from "@/components/site/blocks";
+import { JsonLd } from "@/components/site/JsonLd";
 import { formatDate, canOptimizeImage } from "@/lib/format";
 
 type Props = { searchParams: Promise<{ q?: string; category?: string; tag?: string; page?: string }> };
 
+const SEO_TITLE = "Website, App & SEO Guides for Indian Businesses";
+const SEO_DESCRIPTION =
+  "Practical guides on website development costs in India, planning, design, SEO and choosing the right technology for your business.";
+
+const absolute = (src: string) => (src.startsWith("http") ? src : `${env.siteUrl}${src}`);
+
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const { q, category, tag, page } = await searchParams;
-  const meta = await buildMetadata({ path: "/blog", title: "Insights" });
-  // Filtered and paginated listings shouldn't compete with the main page in search.
-  return q || category || tag || (page && page !== "1") ? { ...meta, robots: { index: false, follow: true } } : meta;
+  const pageNumber = Math.max(1, Number.parseInt(page ?? "1", 10) || 1);
+  const filtered = Boolean(q || category || tag);
+
+  // Page 2, 3… get their own canonical URL and title so Google can index older posts.
+  const meta = await buildMetadata({
+    path: pageNumber > 1 && !filtered ? `/blog?page=${pageNumber}` : "/blog",
+    title: pageNumber > 1 ? `${SEO_TITLE} — Page ${pageNumber}` : SEO_TITLE,
+    description: SEO_DESCRIPTION,
+  });
+  // Search, category and tag results duplicate the main listing, so they stay out of the index.
+  return filtered ? { ...meta, robots: { index: false, follow: true } } : meta;
 }
 
 function PostCard({ post, large = false }: { post: BlogPost; large?: boolean }) {
   return (
     <article className={`group relative flex flex-col ${large ? "lg:grid lg:grid-cols-[1.2fr_1fr] lg:items-center lg:gap-12" : ""}`}>
-      <div className={`relative overflow-hidden rounded-[var(--radius-card)] bg-ink ${large ? "aspect-[16/10]" : "aspect-[16/10]"}`}>
+      <div className="relative aspect-[16/10] overflow-hidden rounded-[var(--radius-card)] bg-ink">
         {post.cover_image ? (
-          <Image src={post.cover_image} alt="" fill sizes={large ? "(max-width: 1024px) 100vw, 640px" : "(max-width: 768px) 100vw, 400px"} className="object-cover transition-transform duration-700 group-hover:scale-[1.02]" unoptimized={!canOptimizeImage(post.cover_image)} />
+          <Image
+            src={post.cover_image}
+            alt={post.title}
+            fill
+            sizes={large ? "(max-width: 1024px) 100vw, 640px" : "(max-width: 768px) 100vw, 400px"}
+            className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+            unoptimized={!canOptimizeImage(post.cover_image)}
+          />
         ) : (
           <div className="flex h-full items-end p-6">
             <span className="font-display text-2xl leading-tight text-white/90">{post.category_name ?? "Insights"}</span>
@@ -31,7 +54,7 @@ function PostCard({ post, large = false }: { post: BlogPost; large?: boolean }) 
       <div className={large ? "mt-6 lg:mt-0" : "mt-5"}>
         <p className="text-sm text-slate">
           {post.category_name ? `${post.category_name} · ` : ""}
-          {formatDate(post.published_at)} · {post.reading_minutes} min read
+          <time dateTime={post.published_at ? new Date(post.published_at).toISOString() : undefined}>{formatDate(post.published_at)}</time> · {post.reading_minutes} min read
         </p>
         <h2 className={`mt-2 leading-snug ${large ? "display-md" : "text-xl"}`}>
           <Link href={`/blog/${post.slug}`} className="after:absolute after:inset-0 group-hover:text-accent">
@@ -66,7 +89,11 @@ export default async function BlogPage({ searchParams }: Props) {
 
   return (
     <>
-      <PageIntro crumbs={[{ label: "Insights" }]} title="Insights" lede="Practical notes on planning, designing and growing websites and digital products.">
+      <PageIntro
+        crumbs={[{ label: "Insights" }]}
+        title="Website, app & SEO guides for Indian businesses"
+        lede="Practical notes on planning, designing, building and growing websites and digital products — with real costs and timelines for India."
+      >
         <form action="/blog" method="get" role="search" className="flex max-w-lg gap-2">
           <label htmlFor="blog-search" className="sr-only">Search articles</label>
           <div className="relative flex-1">
@@ -131,6 +158,29 @@ export default async function BlogPage({ searchParams }: Props) {
           ) : null}
         </div>
       </section>
+
+      {!filtering && result.posts.length ? (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            name: "Alfa Solution Insights",
+            description: SEO_DESCRIPTION,
+            url: `${env.siteUrl}/blog`,
+            inLanguage: "en-IN",
+            publisher: { "@type": "Organization", name: "Alfa Solution", logo: { "@type": "ImageObject", url: `${env.siteUrl}/images/logo-black.png` } },
+            blogPost: result.posts.map((post) => ({
+              "@type": "BlogPosting",
+              headline: post.title,
+              url: `${env.siteUrl}/blog/${post.slug}`,
+              datePublished: post.published_at ? new Date(post.published_at).toISOString() : undefined,
+              dateModified: new Date(post.updated_at).toISOString(),
+              ...(post.cover_image ? { image: absolute(post.cover_image) } : {}),
+              ...(post.excerpt ? { description: post.excerpt } : {}),
+            })),
+          }}
+        />
+      ) : null}
     </>
   );
 }
