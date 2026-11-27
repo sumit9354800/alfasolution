@@ -23,8 +23,19 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(self \"https://checkout.razorpay.com\" \"https://api.razorpay.com\")" },
-  ...(isDev ? [] : [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }]),
+  {
+    key: "Permissions-Policy",
+    value:
+      'camera=(), microphone=(), geolocation=(), payment=(self "https://checkout.razorpay.com" "https://api.razorpay.com")',
+  },
+  ...(isDev
+    ? []
+    : [
+        {
+          key: "Strict-Transport-Security",
+          value: "max-age=31536000; includeSubDomains",
+        },
+      ]),
 ];
 
 const nextConfig: NextConfig = {
@@ -32,7 +43,10 @@ const nextConfig: NextConfig = {
   // appear immediately and builds never need a database connection.
   cacheComponents: false,
   poweredByHeader: false,
-  serverExternalPackages: ["mysql2", "bcryptjs", "sanitize-html"],
+  serverExternalPackages: ["mysql2", "bcryptjs"],
+  // Bundle the HTML sanitizer and its postcss dependency into the build so it never
+  // depends on how node_modules is laid out on the host (Hostinger).
+  transpilePackages: ["sanitize-html", "postcss"],
 
   images: {
     remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
@@ -41,7 +55,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
-      { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }, { key: "Cache-Control", value: "no-store" }] },
+      {
+        source: "/admin/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
+      },
     ];
   },
 
