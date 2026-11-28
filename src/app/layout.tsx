@@ -17,6 +17,8 @@ const sans = localFont({
   display: "swap",
 });
 
+
+
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.alfasolution.net").replace(/\/+$/, "");
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
@@ -26,7 +28,14 @@ export const metadata: Metadata = {
   authors: [{ name: "Alfa Solution" }],
   creator: "Alfa Solution",
   publisher: "Alfa Solution",
-  icons: { icon: "/icon.png", shortcut: "/icon.png", apple: "/icon.png" },
+   icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: { url: "/apple-icon.png", sizes: "180x180" },
+  },
 };
 
 export const viewport: Viewport = {
