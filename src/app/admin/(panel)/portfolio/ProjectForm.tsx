@@ -12,10 +12,29 @@ export function PortfolioForm({ action, project, services, submitLabel }: { acti
           <TextField name="client_name" label="Client name" defaultValue={project?.client_name} />
           <TextField name="category" label="Category" required defaultValue={project?.category} placeholder="e.g. Business website" />
           <SelectField name="project_type" label="Type" defaultValue={project?.project_type ?? "client"} options={[{ value: "client", label: "Client project" }, { value: "independent", label: "Studio / independent project" }]} />
-          <SelectField name="service_id" label="Service" placeholder="None" defaultValue={project?.service_id ?? ""} options={services.map((s) => ({ value: s.id, label: s.title }))} />
           <TextField name="year" label="Year" type="number" defaultValue={project?.year ?? ""} />
           <TextField name="role" label="Our role" defaultValue={project?.role} />
         </div>
+        <fieldset>
+          <legend className="text-sm font-semibold">Services</legend>
+          <p className="mt-1 text-sm text-slate">
+            Tick every service this project used. It appears under each one on /work and on those service pages. The first ticked service is shown as the main one.
+          </p>
+          <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
+            {services.map((s) => (
+              <label key={s.id} className="flex items-center gap-3 rounded-lg border border-line px-3 py-2.5 text-sm has-[:checked]:border-ink has-[:checked]:bg-paper">
+                <input
+                  type="checkbox"
+                  name="service_ids"
+                  value={s.id}
+                  defaultChecked={project?.service_ids.includes(s.id)}
+                  className="h-4 w-4 accent-[var(--color-ink)]"
+                />
+                {s.title}
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <TextArea name="summary" label="Summary" rows={3} required defaultValue={project?.summary} />
         <ImageField name="cover_image" label="Screenshot / cover image" defaultValue={project?.cover_image} hint="Shown before the live preview loads, and as the fallback when a site can’t be embedded." />
       </FormSection>

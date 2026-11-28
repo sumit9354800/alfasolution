@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { ExternalLink } from "lucide-react";
 import { buildMetadata } from "@/server/seo";
 import { env } from "@/server/env";
-import { canEmbed, getProjectBySlug, listPortfolio } from "@/server/repos/content";
+import { canEmbed, getProjectBySlug, listPortfolio, listServices } from "@/server/repos/content";
 import { Breadcrumbs, CtaBand } from "@/components/site/blocks";
 import { JsonLd } from "@/components/site/JsonLd";
 import { LiveBrowser } from "@/components/site/LiveBrowser";
@@ -30,7 +30,10 @@ export default async function CaseStudyPage({ params }: Props) {
   const project = await getProjectBySlug(slug);
   if (!project) notFound();
 
-  const all = await listPortfolio();
+  const [all, services] = await Promise.all([listPortfolio(), listServices()]);
+  const projectServices = project.service_ids
+    .map((id) => services.find((s) => s.id === id))
+    .filter((s): s is NonNullable<typeof s> => Boolean(s));
   const position = all.findIndex((p) => p.id === project.id);
   const next = all.length > 1 ? all[(position + 1) % all.length] : null;
 
@@ -38,7 +41,17 @@ export default async function CaseStudyPage({ params }: Props) {
     ["Client", project.client_name || (project.project_type === "independent" ? "Studio project" : "Confidential")],
     ["Year", project.year ?? "—"],
     ["Our role", project.role ?? "—"],
-    ["Service", project.service_slug ? <Link href={`/services/${project.service_slug}`} className="link">{project.service_title}</Link> : project.category],
+    [
+      projectServices.length > 1 ? "Services" : "Service",
+      projectServices.length
+        ? projectServices.map((s, i) => (
+            <span key={s.id}>
+              {i > 0 ? ", " : null}
+              <Link href={`/services/${s.slug}`} className="link">{s.title}</Link>
+            </span>
+          ))
+        : project.category,
+    ],
   ];
 
   const story: [string, string | null][] = [

@@ -57,6 +57,7 @@ export async function getServiceById(id: number) {
 // ---------------------------------------------------------------------------
 
 export type PortfolioProject = {
+  service_ids: any;
   id: number;
   slug: string;
   title: string;

@@ -6,7 +6,7 @@ import { z } from "zod";
 import type { ActionState } from "@/lib/action-state";
 import { slugify } from "@/lib/format";
 import { adminAction, bool, lines, str, ValidationError, zodFieldErrors } from "@/server/admin-action";
-import { execute, queryOne, toJson } from "@/server/db";
+import { execute, query, queryOne, toJson } from "@/server/db";
 import { logActivity } from "@/server/audit";
 import { refreshEmbedStatus } from "@/server/embed-check";
 import { refreshPublicSite } from "@/server/revalidate";
@@ -18,7 +18,6 @@ const schema = z.object({
   client_name: z.string().trim().max(160),
   category: z.string().trim().min(2, "Enter a category, e.g. Business website.").max(160),
   project_type: z.enum(["client", "independent"]),
-  service_id: z.union([z.literal(""), z.coerce.number().int().positive()]),
   year: z.union([z.literal(""), z.coerce.number().int().min(2000).max(2100)]),
   role: z.string().trim().max(160),
   summary: z.string().trim().min(20, "Write a summary of at least 20 characters.").max(600),
@@ -34,27 +33,36 @@ const schema = z.object({
   seo_description: z.string().trim().max(320),
 });
 
-function parse(form: FormData) {
+/** Ticked services, keeping only ids that exist. The first one is the main service. */
+async function serviceIds(form: FormData) {
+  const picked = [...new Set(form.getAll("service_ids").map((v) => Number(v)).filter((id) => Number.isInteger(id) && id > 0))];
+  if (!picked.length) return [];
+  const existing = new Set((await query<{ id: number }>("SELECT id FROM services")).map((r) => Number(r.id)));
+  return picked.filter((id) => existing.has(id)).slice(0, 10);
+}
+
+async function parse(form: FormData) {
   const raw = Object.fromEntries(Object.keys(schema.shape).map((k) => [k, str(form, k)]));
   if (!raw.slug) raw.slug = slugify(String(raw.title));
   if (!raw.sort_order) raw.sort_order = "0";
   const r = schema.safeParse(raw);
   if (!r.success) throw new ValidationError(zodFieldErrors(r.error));
-  return { ...r.data, technologies: lines(form, "technologies"), features: lines(form, "features"), is_featured: bool(form, "is_featured"), is_published: bool(form, "is_published") };
+  const service_ids = await serviceIds(form);
+  return { ...r.data, service_ids, technologies: lines(form, "technologies"), features: lines(form, "features"), is_featured: bool(form, "is_featured"), is_published: bool(form, "is_published") };
 }
 
 const n = (v: string | number) => (v === "" ? null : v);
-const values = (d: ReturnType<typeof parse>) => [
-  d.slug, d.title, n(d.client_name), d.category, d.project_type, n(d.service_id), n(d.year), n(d.role), d.summary, n(d.challenge), n(d.solution), n(d.results),
+const values = (d: Awaited<ReturnType<typeof parse>>) => [
+  d.slug, d.title, n(d.client_name), d.category, d.project_type, d.service_ids[0] ?? null, d.service_ids.length ? toJson(d.service_ids) : null, n(d.year), n(d.role), d.summary, n(d.challenge), n(d.solution), n(d.results),
   toJson(d.technologies), toJson(d.features), n(d.cover_image), n(d.live_url), n(d.repo_url), d.embed_mode, d.is_featured ? 1 : 0, d.is_published ? 1 : 0, d.sort_order,
   n(d.seo_title), n(d.seo_description),
 ];
-const COLUMNS = "slug, title, client_name, category, project_type, service_id, year, role, summary, challenge, solution, results, technologies, features, cover_image, live_url, repo_url, embed_mode, is_featured, is_published, sort_order, seo_title, seo_description";
+const COLUMNS = "slug, title, client_name, category, project_type, service_id, service_ids, year, role, summary, challenge, solution, results, technologies, features, cover_image, live_url, repo_url, embed_mode, is_featured, is_published, sort_order, seo_title, seo_description";
 
 export async function createProject(_: ActionState, form: FormData) {
   let id = 0;
   const result = await adminAction("portfolio.manage", async (user) => {
-    const d = parse(form);
+    const d = await parse(form);
     const r = await execute(`INSERT INTO portfolio_projects (${COLUMNS}) VALUES (${COLUMNS.split(",").map(() => "?").join(", ")})`, values(d));
     id = r.insertId;
     if (d.live_url) await refreshEmbedStatus(id, d.live_url);
@@ -67,7 +75,7 @@ export async function createProject(_: ActionState, form: FormData) {
 
 export async function updateProject(id: number, _: ActionState, form: FormData) {
   return adminAction("portfolio.manage", async (user) => {
-    const d = parse(form);
+    const d = await parse(form);
     await execute(`UPDATE portfolio_projects SET ${COLUMNS.split(", ").map((c) => `${c} = ?`).join(", ")} WHERE id = ?`, [...values(d), id]);
     const embed = d.live_url ? await refreshEmbedStatus(id, d.live_url) : null;
     await logActivity(user.id, "update", "portfolio", id, `Updated portfolio project ${d.title}`);

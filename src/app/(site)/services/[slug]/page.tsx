@@ -31,7 +31,7 @@ export default async function ServiceDetailPage({ params }: Props) {
   if (!service) notFound();
 
   const [projects, services] = await Promise.all([listPortfolio(), listServices()]);
-  const related = projects.filter((project) => project.service_id === service.id).slice(0, 2);
+  const related = projects.filter((project) => project.service_ids.includes(service.id)).slice(0, 2);
   const others = services.filter((item) => item.id !== service.id).slice(0, 4);
 
   return (
